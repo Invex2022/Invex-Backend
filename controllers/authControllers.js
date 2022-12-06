@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken')
 class AuthController {
  static async registerUser(req, res) {
     const {email, password, firstName, lastName} = req.body
-    console.log(email, password, firstName, lastName,)
+    console.log(email, password, firstName, lastName)
     try {
         function validEmail(userEmail) {
             return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(userEmail);
@@ -27,7 +27,7 @@ class AuthController {
         const hashedPassword = await bcrypt.hash(password, 10)
 
 //return all data in json from users
-        const newUser = await pool.query('INSERT INTO users (email, password, name, last_name) VALUES ($1, $2,$3,$4) RETURNING *', [
+        const newUser = await pool.query('INSERT INTO users (email, password, first_name, last_name) VALUES ($1, $2,$3,$4) RETURNING *', [
             email,
             hashedPassword,
             firstName,
@@ -77,7 +77,7 @@ static async loginUser (req,res) {
             return res.status(200).json({ getUser:getUser.rows, token: token})
 
         } catch (error) {
-
+            return res.status(500).json('Server error')
         }
 }
 }
