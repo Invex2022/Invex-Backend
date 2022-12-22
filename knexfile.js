@@ -1,39 +1,37 @@
 // Update with your config settings.
-
+require("dotenv").config();
 /**
  * @type { Object.<string, import("knex").Knex.Config> }
  */
 module.exports = {
-
-
   development: {
-    client: 'postgresql',
+    client: "postgresql",
     connection: {
-      database: 'Invex',
-      user:     'postgres',
-      password: 'damian'
+      database: "Invex",
+      user: "postgres",
+      password: process.env.PG_SECRET,
     },
     pool: {
       min: 2,
-      max: 10
+      max: 10,
     },
     migrations: {
-      tableName: 'knex_migrations'
-    }
+      tableName: "knex_migrations",
+    },
   },
 
   production: {
-    client: 'pg',
+    client: "pg",
     connection: {
       connectionString: process.env.DATABASE_URL,
-      ssl: {rejectUnauthorized: false}
+      ssl: { rejectUnauthorized: false },
     },
     pool: {
       min: 2,
-      max: 10
+      max: 10,
     },
     migrations: {
-      tableName: 'knex_migrations'
-    }
-  }
-}
+      tableName: "knex_migrations",
+    },
+  },
+};
