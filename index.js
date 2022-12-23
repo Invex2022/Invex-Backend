@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(AuthRouter);
 //Routes
 app.get("/", (req, res) => {
-  res.status(200).json("hello");
+  res.send("hello").status(200);
 });
 
 const port = process.env.PORT || 4000;
