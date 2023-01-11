@@ -18,37 +18,38 @@ class AuthController {
       if (req.path === "/register") {
         console.log(!email.length);
         if (![email, password].every(Boolean)) {
-          return res.status(401).json({ errorMessage: "Missing Requirements" });
+          return res.status(401).json({ errorMessage: "Missing Credentials" });
         } else if (!validEmail(email)) {
           return res
             .status(401)
-            .json({ errorMessage: "The email you have enter is incorrect" });
+            .json({ errorMessage: "The email you have enter is invalid" });
         }
-
-        const user = await pool
-          .query("SELECT * FROM users WHERE email = $1", [email])
-          .then((res) => res.rows);
-        if (user.length !== 0) {
-          return res.status(409).json({
-            errorMessage: "An account with this email already exists.",
-          });
-        }
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        //return all data in json from users
-        const newUser = await pool
-          .query(
-            "INSERT INTO users (email, password, first_name, last_name, username) VALUES ($1, $2,$3,$4, $5) RETURNING *",
-            [email, hashedPassword, firstName, lastName, username]
-          )
-          .then((res) => res.rows);
-        const getUser = await pool.query(
-          "SELECT * FROM users WHERE email = $1",
-          [email]
-        );
-        const token = jwtGenerator(newUser[0].id);
-        return res.status(200).json({ getUser: getUser.rows, token: token });
       }
+      const user = await pool
+        .query("SELECT * FROM users WHERE email = $1", [email])
+        .then((res) => res.rows);
+
+      if (user.length !== 0) {
+        return res
+          .status(409)
+          .json({ errorMessage: "An account with this email already exists." });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      //return all data in json from users
+      const newUser = await pool
+        .query(
+          "INSERT INTO users (email, password, first_name, last_name, username) VALUES ($1, $2,$3,$4, $5) RETURNING *",
+          [email, hashedPassword, firstName, lastName, username]
+        )
+        .then((res) => res.rows);
+
+      const getUser = await pool.query("SELECT * FROM users WHERE email = $1", [
+        email,
+      ]);
+
+      const token = jwtGenerator(newUser[0].id);
+      return res.status(200).json({ getUser: getUser.rows, token: token });
     } catch (error) {
       return res.status(500).json("User not added or token not created");
     }

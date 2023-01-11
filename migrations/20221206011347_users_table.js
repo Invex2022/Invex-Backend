@@ -10,7 +10,7 @@ exports.up = function (knex) {
     table.string("first_name").notNullable();
     table.string("last_name").notNullable();
     table.string("username").notNullable();
-    table.string("total_amount").notNullable().defaultTo(1000);
+    table.float("total_amount").notNullable().defaultTo(1000);
   });
 };
 
