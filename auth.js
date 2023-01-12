@@ -7,6 +7,6 @@ const stocksController = require("./controllers/stocksController.js");
 router.post("/register", AuthController.registerUser);
 router.post("/login", AuthController.loginUser);
 router.post("/buyStocks/:id", stocksController.buyStocks);
-// router.post("/sellStocks", stocksController.sellStocks);
+router.post("/sellStocks/:id", stocksController.sellStocks);
 
 module.exports = router;

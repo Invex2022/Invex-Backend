@@ -16,10 +16,14 @@ class stocks {
         "SELECT total_amount FROM users WHERE id = $1",
         [id]
       );
+
       let balance = userBalance.rows[0].total_amount;
+
       if (unit_price * number_of_stocks > balance) {
         return res.status(400).json({ message: "Not enough fund!" });
       }
+
+      // let buyingCost = number_of_stocks * unit_price;
 
       // check if company_name already exists in the stocks table
       const existingStock = await pool.query(
@@ -32,11 +36,15 @@ class stocks {
         const currentStock = existingStock.rows[0];
         const newNumberOfStocks =
           currentStock.number_of_stocks + number_of_stocks;
-        const newUnitPrice = (currentStock.unit_price + unit_price) / 2;
+        let updatedUnitPirce = existingStock.rows[0].unit_price + unit_price;
+        console.log(updatedUnitPirce);
+        let updatedUnitePrice = updatedUnitPirce / 2;
+        console.log(updatedUnitePrice);
         await pool.query(
           "UPDATE stocks SET number_of_stocks = $1, unit_price = $2 WHERE id= $3",
-          [newNumberOfStocks, newUnitPrice, currentStock.id]
+          [newNumberOfStocks, updatedUnitePrice, currentStock.id]
         );
+        console.log(updatedUnitePrice);
       } else {
         // if it doesn't exist, insert a new record
         await pool.query(
@@ -44,11 +52,9 @@ class stocks {
           [id, ticker_name, company_name, number_of_stocks, unit_price, sector]
         );
       }
-
-      const stockbalance = balance;
-      const updatePrice = stockbalance - unit_price * number_of_stocks;
+      let updatedBalance = balance - unit_price * number_of_stocks;
       await pool.query("UPDATE users SET total_amount = $1 WHERE id = $2; ", [
-        updatePrice,
+        updatedBalance,
         id,
       ]);
       return res.json({
@@ -76,55 +82,57 @@ class stocks {
       } = req.body;
       const { id } = req.params;
 
-      let userStocks = await pool.query(
-        "SELECT * FROM stocks WHERE user_id = $1 AND company_name = $2",
-        [id, company_name]
-      );
-      if (userStocks.rows.length === 0) {
+      const userStock = await pool
+        .query(
+          "SELECT * FROM stocks WHERE user_id = $1 AND company_name = $2",
+          [id, company_name]
+        )
+        .then((result) => result.rows[0]);
+
+      if (!userStock) {
         return res.status(400).json({ message: "You do not own this stock" });
       }
 
-      let userStock = userStocks.rows[0];
       if (number_of_stocks > userStock.number_of_stocks) {
         return res
           .status(400)
           .json({ message: "You do not have that many stocks to sell!" });
       }
 
-      if (unit_price > userStock.unit_price) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "You are selling your stocks at a higher price than what you bought",
-          });
+      let currentUnitPrice = userStock.unit_price;
+
+      if (unit_price !== userStock.unit_price) {
+        return res.status(400).json({
+          message: `The sell point for this stock is ${currentUnitPrice}`,
+        });
       }
 
-      let userBalance = await pool.query(
-        "SELECT total_amount FROM users WHERE id = $1",
-        [id]
-      );
-      let balance = userBalance.rows[0].total_amount;
-      const newNumberOfStocks = userStock.number_of_stocks - number_of_stocks;
+      const userBalance = await pool
+        .query("SELECT total_amount FROM users WHERE id = $1", [id])
+        .then((result) => result.rows[0].total_amount);
+
+      let newNumberOfStocks = userStock.number_of_stocks - number_of_stocks;
+
       if (newNumberOfStocks === 0) {
         await pool.query("DELETE FROM stocks WHERE id = $1", [userStock.id]);
       } else {
         await pool.query(
-          "UPDATE stocks SET number_of_stocks = $1 WHERE id = $2;",
+          "UPDATE stocks SET number_of_stocks = $1 WHERE id = $2",
           [newNumberOfStocks, userStock.id]
         );
       }
-      const updatePrice = balance + unit_price * number_of_stocks;
-      await pool.query("UPDATE users SET total_amount = $1 WHERE id = $2; ", [
-        updatePrice,
+
+      await pool.query("UPDATE users SET total_amount = $1 WHERE id = $2;", [
+        userBalance + number_of_stocks * unit_price,
         id,
       ]);
+
       return res.json({
         message: "You have successfully sold your stock.",
         ticker_name,
         company_name,
         number_of_stocks,
-        unit_price,
+        currentUnitPrice,
         sector,
       });
     } catch (error) {
