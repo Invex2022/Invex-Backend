@@ -1,4 +1,4 @@
-const pool = require("../db");
+const pool = require("../database/db");
 
 class stocks {
   static async buyStocks(req, res) {

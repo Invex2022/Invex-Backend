@@ -1,13 +1,14 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
-const AuthRouter = require("./auth");
+const AuthRouter = require("./routes/router");
 
 //middleware
 app.use(cors());
 app.use(express.json());
-app.use(AuthRouter);
+
 //Routes
+app.use(AuthRouter);
 app.get("/", (req, res) => {
   res.send("hello").status(200);
 });
