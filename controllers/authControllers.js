@@ -1,4 +1,4 @@
-const pool = require("../database/db");
+const pool = require("../db");
 const bcrypt = require("bcrypt");
 const jwtGenerator = require("../tokenGenerator");
 const jwt = require("jsonwebtoken");
