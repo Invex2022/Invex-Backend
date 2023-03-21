@@ -1,4 +1,4 @@
-const pool = require("../database/db");
+const pool = require("../db");
 const bcrypt = require("bcrypt");
 const jwtGenerator = require("../tokenGenerator");
 const jwt = require("jsonwebtoken");
@@ -98,6 +98,11 @@ class AuthController {
     } catch (error) {
       return res.status(500).json("Server error");
     }
+  }
+
+  static async getAllUsers(req, res) {
+    const query = await pool.query("SELECT * FROM users");
+    return res.status(200).json(query.rows);
   }
 }
 
