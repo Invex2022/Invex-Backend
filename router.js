@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const AuthController = require("../controllers/authControllers.js");
-const authorization = require("../middleware/authorization");
-const stocksController = require("../controllers/stocksController.js");
+const AuthController = require("./controllers/authControllers.js");
+const authorization = require("./middleware/authorization");
+const stocksController = require("./controllers/stocksController.js");
 
 router.get("/user", AuthController.getAllUsers);
 router.post("/register", AuthController.registerUser);
